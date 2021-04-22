@@ -4,8 +4,7 @@ import br.com.caelum.leilao.builder.CriadorDeLeilao;
 import br.com.caelum.leilao.dominio.Lance;
 import br.com.caelum.leilao.dominio.Leilao;
 import br.com.caelum.leilao.dominio.Usuario;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.List;
 
@@ -19,12 +18,34 @@ public class TesteAvaliador {
     private Usuario maria;
     private Usuario jose;
 
+    @BeforeClass
+    public static void testandoBeforeClass() {
+        System.out.println("before class");
+    }
+
+    @AfterClass
+    public static void testandoAfterClass() {
+        System.out.println("after class");
+    }
+
     @Before
-    public void criaAvaliador(){
+    public void setUp(){
         this.leiloeiro = new Avaliador();
         joao = new Usuario("Joao");
         maria = new Usuario("Maria");
         jose = new Usuario("Joao");
+    }
+
+    @After
+    public void finaliza() {
+        System.out.println("fim");
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void naoDeveAvaliarLeiloesSemNenhumLanceDado(){
+        Leilao leilao = new CriadorDeLeilao().para("Ps3 bolado").constroi();
+        leiloeiro.avalia(leilao);
+        Assert.fail();
     }
 
     @Test
@@ -34,7 +55,7 @@ public class TesteAvaliador {
                 .lance(maria, 200.0)
                 .lance(joao, 300.0)
                 .lance(maria, 400.0)
-                .lance(joao, 500.0)
+                .lance(jose, 500.0)
                 .constroi();
 
         leiloeiro.avalia(leilao);
@@ -117,17 +138,4 @@ public class TesteAvaliador {
         assertEquals(450.0, maiores.get(0).getValor(), 0.00001);
         assertEquals(100.0, maiores.get(1).getValor(), 0.00001);
     }
-
-    @Test
-    public void deveRetornarListaVaziaParaLeilaoSemLance(){
-        Leilao leilao = new CriadorDeLeilao().para("Playstation 3 Novo")
-                .constroi();
-
-        leiloeiro.avalia(leilao);
-
-        List<Lance> maiores = leiloeiro.getTresMaiores();
-        assertEquals(0, maiores.size());
-    }
-
-
 }
