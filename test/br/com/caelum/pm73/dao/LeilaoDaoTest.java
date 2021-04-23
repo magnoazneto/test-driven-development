@@ -1,5 +1,6 @@
 package br.com.caelum.pm73.dao;
 
+import br.com.caelum.pm73.dominio.Lance;
 import br.com.caelum.pm73.dominio.Leilao;
 import br.com.caelum.pm73.dominio.Usuario;
 import org.hibernate.Session;
@@ -146,6 +147,40 @@ public class LeilaoDaoTest {
 
         List<Leilao> leiloes = leilaoDao.porPeriodo(comecoDoIntervalo, fimDoIntervalo);
         assertEquals(0, leiloes.size());
+    }
+
+    @Test
+    public void deveRetornarLeiloesDisputados() {
+        Usuario mauricio = new Usuario("Mauricio", "mauricio@aniche.com.br");
+        Usuario marcelo = new Usuario("Marcelo", "marcelo@aniche.com.br");
+
+        Leilao leilao1 = new LeilaoBuilder()
+                .comDono(marcelo)
+                .comValor(3000.0)
+                .comLance(Calendar.getInstance(), mauricio, 3000.0)
+                .comLance(Calendar.getInstance(), marcelo, 3100.0)
+                .constroi();
+
+        Leilao leilao2 = new LeilaoBuilder()
+                .comDono(mauricio)
+                .comValor(3200.0)
+                .comLance(Calendar.getInstance(), mauricio, 3000.0)
+                .comLance(Calendar.getInstance(), marcelo, 3100.0)
+                .comLance(Calendar.getInstance(), mauricio, 3200.0)
+                .comLance(Calendar.getInstance(), marcelo, 3300.0)
+                .comLance(Calendar.getInstance(), mauricio, 3400.0)
+                .comLance(Calendar.getInstance(), marcelo, 3500.0)
+                .constroi();
+
+        usuarioDao.salvar(marcelo);
+        usuarioDao.salvar(mauricio);
+        leilaoDao.salvar(leilao1);
+        leilaoDao.salvar(leilao2);
+
+        List<Leilao> leiloes = leilaoDao.disputadosEntre(2500, 3500);
+
+        assertEquals(1, leiloes.size());
+        assertEquals(3200.0, leiloes.get(0).getValorInicial(), 0.00001);
     }
 
 }
