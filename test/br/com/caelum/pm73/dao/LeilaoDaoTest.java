@@ -251,6 +251,25 @@ public class LeilaoDaoTest {
         assertEquals(150.0, leilaoDao.getValorInicialMedioDoUsuario(comprador), 0.001);
     }
 
+    @Test
+    public void deveDeletarUmLeilao() {
+        Usuario mauricio = new Usuario("Mauricio", "m@a.com");
+        Leilao leilao = new LeilaoBuilder()
+                .comDono(mauricio)
+                .comLance(Calendar.getInstance(), mauricio, 10000.0)
+                .constroi();
+
+        usuarioDao.salvar(mauricio);
+        leilaoDao.salvar(leilao);
+
+        session.flush();
+
+        leilaoDao.deleta(leilao);
+
+        assertNull(leilaoDao.porId(leilao.getId()));
+
+    }
+
 
 
 }

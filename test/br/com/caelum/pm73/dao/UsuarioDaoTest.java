@@ -3,6 +3,7 @@ package br.com.caelum.pm73.dao;
 import br.com.caelum.pm73.dominio.Usuario;
 import org.hibernate.Session;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,6 +48,44 @@ public class UsuarioDaoTest {
     public void deveRetornarNuloParaUsuarioInvalido(){
         Usuario usuario = usuarioDao.porNomeEEmail("Alberto", "alberto@gmail.com");
         assertNull(usuario);
+    }
+
+    @Test
+    public void deveDeletarUsuario(){
+        Usuario usuario = new Usuario(nomeUsuario, emailUsuario);
+        usuarioDao.salvar(usuario);
+        usuarioDao.deletar(usuario);
+
+        session.flush(); // para lidar com os caches do hibernate
+        session.clear();
+
+        Usuario usuarioBuscado = usuarioDao.porNomeEEmail(nomeUsuario, emailUsuario);
+        Assert.assertNull(usuarioBuscado);
+    }
+
+    @Test
+    public void deveAlterarUmUsuario() {
+        Usuario usuario =
+                new Usuario("Mauricio Aniche", "mauricio@aniche.com.br");
+
+        usuarioDao.salvar(usuario);
+
+        usuario.setNome("João da Silva");
+        usuario.setEmail("joao@silva.com.br");
+
+        usuarioDao.atualizar(usuario);
+
+        session.flush();
+
+        Usuario novoUsuario =
+                usuarioDao.porNomeEEmail("João da Silva", "joao@silva.com.br");
+        assertNotNull(novoUsuario);
+        System.out.println(novoUsuario);
+
+        Usuario usuarioInexistente =
+                usuarioDao.porNomeEEmail("Mauricio Aniche", "mauricio@aniche.com.br");
+        assertNull(usuarioInexistente);
+
     }
 
 }
